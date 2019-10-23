@@ -1,0 +1,59 @@
+\:root
+	--MENU_WIDTH: 600px
+	--GREY3: dimgrey
+
+body
+	background-color: black
+
+
+div#menu
+	$_trans: 1s
+
+	cursor: pointer
+	position: absolute
+	right: 0px
+	transition: .5s ease-in-out
+	// *  DEP: #hamburger_logo > img height
+	width: var(--MENU_WIDTH)
+
+	&:focus
+		border-width: 0px
+
+
+	& > span.lines
+		background: white
+		height: 2px
+		position: absolute
+		top: calc(var(--MENU_WIDTH) / 2)
+		transform-origin: center
+		transition: transform $_trans, box-shadow $_trans
+		width: calc(var(--MENU_WIDTH) / 2)
+
+
+		&:after
+			background: white
+			bottom: -10px
+			content: ""
+			height: 100%
+			position: absolute
+			transition: transform $_trans, bottom $_trans, top $_trans
+			width: 100%
+
+
+	&[class~="open"]
+
+		& > span.lines
+			transform: rotate(45deg)
+			top: calc(var(--MENU_WIDTH) / 1.5)
+
+			&:after
+				transform: rotate(90deg)
+				bottom: calc((var(--MENU_WIDTH) / 4))
+				right: calc((var(--MENU_WIDTH) / 4))
+
+
+@keyframes FadeOut
+	from
+		opacity: 1
+	to
+		opacity: 0

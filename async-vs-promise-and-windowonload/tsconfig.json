@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"experimentalDecorators": true,
+		"target": "ES2017",
+		"noImplicitAny": false,
+		"keyofStringsOnly": true,
+		"sourceMap": true
+	}
+}
