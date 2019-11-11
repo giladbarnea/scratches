@@ -1,6 +1,6 @@
 import {sayHi} from "./giladbarnea/index";
 
-console.log(sayHi);
+sayHi('index.ts');
 
 
 
