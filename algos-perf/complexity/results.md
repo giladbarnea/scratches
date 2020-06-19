@@ -30,7 +30,7 @@ hashtables are 10,000x faster
 | dict      | 0.5ms |
 | frozenset | 0.5ms |
 
-### hash
+## hash
 #### 100K
 frozenset is 4000x faster than tuple
 
@@ -45,18 +45,18 @@ frozenset is 6x faster than tuple
 
 ## getting
 #### 300K
-dict is 3700x faster than set/frozenset
-dict is 1250x faster than deque/list/tuple
-deque/list/tuple 3x faster than set/frozenset
+dict is 13,000x faster than set/frozenset
+dict is 5000x faster than deque/list/tuple
+deque/list/tuple 2.6x faster than set/frozenset
 
-| struct    | time        (ms)        |
-|-----------|-------------------------|
-| dict      | 0.0000000008 (0.0008ns) |
-| deque     | 0.000005 (5ns)          |
-| list      | 0.000005 (5ns)          |
-| tuple     | 0.000005 (5ns)          |
-| set       | 0.000003 (3ns)          |
-| frozenset | 0.000003 (3ns)          |
+| struct    | time        (ms)      |
+|-----------|-----------------------|
+| dict      | 0.000000001 (0.001ns) |
+| deque     | 0.000005 (5ns)        |
+| list      | 0.000005 (5ns)        |
+| tuple     | 0.000005 (5ns)        |
+| set       | 0.000013 (13ns)       |
+| frozenset | 0.000013 (13ns)       |
 
 #### 100K
 dict is 3700x faster than set/frozenset
@@ -77,14 +77,14 @@ dict is 900x faster than set/frozenset
 dict is 500x faster than deque/list/tuple
 deque/list/tuple 1.5x faster than set/frozenset
 
-| struct    | time        (ms)         |
-|-----------|--------------------------|
-| dict      | 0.0000000009 (0.00009ns) |
-| deque     | 0.0000005 (0.5ns)        |
-| list      | 0.0000005 (0.5ns)        |
-| tuple     | 0.0000005 (0.5ns)        |
-| set       | 0.0000008 (0.8ns)        |
-| frozenset | 0.0000008 (0.8ns)        |
+| struct    | time        (ms)      |
+|-----------|-----------------------|
+| dict      | 0.000000001 (0.001ns) |
+| deque     | 0.0000005 (0.5ns)     |
+| list      | 0.0000005 (0.5ns)     |
+| tuple     | 0.0000005 (0.5ns)     |
+| set       | 0.0000008 (0.8ns)     |
+| frozenset | 0.0000008 (0.8ns)     |
 
 #### 10K
 dict is 250x faster than set/frozenset
@@ -93,7 +93,7 @@ deque/list/tuple 1.5x faster than set/frozenset
 
 | struct    | time        (ms)      |
 |-----------|-----------------------|
-| dict      | 0.000000001 0.001(ns) |
+| dict      | 0.000000001 (0.001ns) |
 | deque     | 0.00000015 (0.15ns)   |
 | list      | 0.00000015 (0.15ns)   |
 | tuple     | 0.00000015 (0.15ns)   |
@@ -125,3 +125,6 @@ dict is 2.5x faster than the rest
 | tuple     | 0.000000002 (0.002ns)   |
 | set       | 0.000000002 (0.002ns)   |
 | frozenset | 0.000000002 (0.002ns)   |
+
+## Initialization
+## Extension
