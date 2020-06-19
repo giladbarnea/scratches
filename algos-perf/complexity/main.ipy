@@ -1,0 +1,108 @@
+from random import randint, choice
+from string import ascii_letters, punctuation
+from more_itertools import random_combination_with_replacement
+from collections import deque
+strings = ascii_letters + punctuation
+
+
+def randstring():
+    return ''.join(random_combination_with_replacement(strings, randint(1, 10)))
+
+
+def generate_randoms(size):
+    # build list of `size` randoms
+    randoms = []
+    for _ in range(size):
+        if randint(0, 1):
+            # random string
+            randoms.append(randstring())
+        else:
+            randoms.append(randint(0, size*100))
+    return randoms
+
+
+def build(typ, size):
+    if typ is dict:
+        return dict.fromkeys(generate_randoms(size), None)
+    else:
+        return typ(generate_randoms(size))
+
+structs = dict(
+    deque=deque,
+    list=list,
+    tuple=tuple,
+    set=set,
+    dict=dict,
+    frozenset=frozenset
+)
+
+def print_microseconds(microseconds):
+    mili = round(microseconds / 1000, 15)
+    micro = round(microseconds,10)
+    nano = round(microseconds * 1000, 5)
+    print(f'ms'+(' '*(len(str(mili))-1))+'| micro'+ (' '*(len(str(micro))-4))+'| nano')
+    print(f'{mili} | {micro} | {nano}\n')
+
+def time_contains(typ, size):
+    built = build(typ, size)
+    randoms = generate_randoms(size)
+    stats = %timeit -n1 -r2 -o for random in randoms: random in built
+    return stats.average
+
+def time_iter(typ, size):
+    def noop(arg):
+        arg
+    built = build(typ, size)
+    stats = %timeit -o for x in built: noop(x)
+    return stats.average
+
+def time_hash(typ, size):
+    try:
+        built = build(typ, size)
+        stats = %timeit -n10 -o hash(built)
+        return stats.average
+    except TypeError:
+        return None
+
+def get(coll, item):
+    for x in coll: 
+        if x == item: 
+            return x
+
+def time_get(typ, size):
+    randoms = generate_randoms(size)
+    avgs = []
+    if typ is dict:
+        built = dict.fromkeys(generate_randoms(size), None)
+        for _ in range(min(1000, size)):
+            item = choice(randoms)
+            stats = %timeit -n1 -r1 -o -q built.get(item)
+            # print(stats,'\n',f'avg: {stats.average}, best: {stats.best}, worst: {stats.worst}\n')
+            avgs.append(stats.average)
+    else:
+        built = typ(randoms)
+        for _ in range(min(1000, size)):
+            item = choice(randoms)
+            stats = %timeit -n1 -o -q get(built,item)
+            # print(stats,'\n',f'avg: {stats.average}, best: {stats.best}, worst: {stats.worst}\n')
+            avgs.append(stats.average)
+    microsecond = (sum(avgs) / len(avgs))
+    worst = max(avgs)
+    best = min(avgs)
+    print('average:')
+    print_microseconds(microsecond)
+    print(f'best:')
+    print_microseconds(best)
+    print(f'worst:')
+    print_microseconds(worst)
+    return microsecond
+
+def test(fn):
+    print(f'{fn.__name__}\n'+'='*len(fn.__name__))
+    for name, struct in structs.items():
+        for size in (100, 1000, 10000, 30000):
+            print(f'\n{name} @ {size}\n'+'-'*len(name))
+            average = fn(struct, size)
+            if average is None:
+                continue
+            # print(f'size: {size}, average: {average}')

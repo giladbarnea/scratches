@@ -4,3 +4,8 @@ env
 __pycache__
 node_modules
 sygnia/
+
+electron-quick-start
+electron-9.0.0-quickstart
+flameshot
+termcolor-1.1.0
