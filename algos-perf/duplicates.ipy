@@ -1,0 +1,101 @@
+# * 1 array: O(n) time
+# https://www.geeksforgeeks.org/find-duplicates-in-on-time-and-constant-extra-space/
+# from copy import deepcopy
+from typing import List, Callable, TypeVar, Generic, Any
+from random import randrange, random
+import pandas as pd
+from collections import OrderedDict
+
+# import big_o
+
+
+def get_arr(size: int) -> List[int]:
+    arr = []
+    for i in range(size):
+        arr.append(randrange(0, size))
+    return arr
+    # return big_o.datagen.integers(size, 2, 7)
+
+
+def find_duplicates_1_array__linear(arr):
+    # DOESNT REALLY WORK
+    arr_len = len(arr)
+    arr_copy = deepcopy(arr)
+    for i in range(arr_len):
+        item = arr[i]
+        modolu_len = item % arr_len
+        modified = arr[modolu_len] + arr_len
+        # print(f'i: ', i,
+        #       '\nitem: ', item,
+        #       '\nmodolu_len: ', modolu_len,
+        #       '\nmodified: ', modified)
+        arr[modolu_len] = modified
+    
+    # print("The repeating elements are : ")
+    duplicates = []
+    # print(f'arr after: ', arr)
+    for i in range(arr_len):
+        item = arr[i]
+        foo = arr_copy[i]
+        if item >= arr_len * 2:
+            duplicates.append(foo)
+            # print(f'duplicate: i={i}', foo)
+    return duplicates
+
+
+def find_duplicates_1_array(arr: List[int]) -> List[int]:
+    duplicates = []
+    for x in arr:
+        if arr.count(x) > 1:
+            duplicates.append(x)
+    return duplicates
+
+
+T = TypeVar('T')
+
+
+class Complexity(Generic[T]):
+    def __init__(self, target_fn: Callable[[T], Any], input_builder: Callable[[int, Any,Any], T]):
+        self.target_fn = target_fn
+        self.results = dict()
+        self.input_builder = input_builder
+        self.sizes = [1, 10, 100, 1000]
+
+
+    def _timeit(self, size:int, *input_builder_args:Any):
+        input_ = self.input_builder(size, *input_builder_args)
+        stats = %timeit -o self.target_fn(input_)
+        self.results[size] = stats.average
+
+    def popuplate_results(self):
+        self._timeit(self.sizes[0])
+        for i, size in enumerate(self.sizes[1:], 1):
+            randfraction = random()
+            # 10 → [9:11], 100 → [90:110], ...
+            randomized = size + int(randfraction * self.sizes[i - 1])
+            print(f'randomized size: {randomized}')
+            self._timeit(randomized)
+        print('results: ',self.results)
+
+    def measure(self)->pd.DataFrame:
+        """Calculates the growth of the time it took to run `fn`, adjusted to the growth in input size."""
+        metaresults = OrderedDict()
+        res_keys = list(self.results.keys())
+        for i, (size, res) in enumerate(self.results.items()):
+            try:
+                nextsize = res_keys[i + 1]
+                nextres = self.results[nextsize]
+                metaresults[nextsize / size] = nextres / res
+            except IndexError:
+                break
+        df = pd.DataFrame(metaresults.values(), index=metaresults.keys())
+        df.plot()
+        return df
+
+
+complexity = Complexity(find_duplicates_1_array, get_arr)
+# self.popuplate_results()
+# df = complexity.measure()
+
+
+
