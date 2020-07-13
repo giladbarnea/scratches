@@ -1,10 +1,10 @@
 import json
-import ijson
 import pandas as pd
 from time import sleep
 
 
 def with_ijson(f):
+    import ijson
     parser = ijson.parse(f)
     start_new_state = False
     data = dict()
@@ -29,8 +29,24 @@ def with_ijson(f):
     return data
 
 
-def with_json(f):
-    return json.load(f)
+def partial_json(fp, *, objs: int = None, until_key=None, lines: int = None, size=None) -> dict:
+    if len([arg for arg in (objs, lines, until_key, size) if arg is not None]) != 1:
+        raise ValueError("Specify exactly one parameter: either objs, lines, until_key or size.")
+    if lines or size:
+        raise NotImplementedError
+    data: dict = json.load(fp)
+    keys = list(data.keys())
+    if objs:
+        return {k: data[k] for k in keys[:objs]}
+    if until_key:
+        if data[until_key]:
+            # spare O(n) by raising KeyError if doesn't exist
+            pass
+        dct = dict()
+        for k, v in data.items():
+            if k == until_key:
+                return dct
+            dct[k] = v
 
 
 def get_chunks(data, chunksize=10000, chunk_count=None):
