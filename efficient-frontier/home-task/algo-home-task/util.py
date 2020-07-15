@@ -83,21 +83,21 @@ def simulate_stream(data):
             return
 
 
-def plot(df: pd.DataFrame, *, title=None):
-    return plotmany(df.index, df, title=title)
+def plot(df: pd.DataFrame, *, title=None, figsize=(25, 15)):
+    return plotmany(df.index, df, title=title, figsize=figsize)
 
 
 @overload
-def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None):
+def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None, figsize=(25, 15)):
     ...
 
 
 @overload
-def plotmany(index: pd.Index, data: Data, *, title=None):
+def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(25, 15)):
     ...
 
 
-def plotmany(index: pd.Index, data, *, title=None):
+def plotmany(index: pd.Index, data, *, title=None, figsize=(25, 15)):
     def _plot_df(_df: pd.DataFrame, _label=None, **_kwargs):
         for _col in _df.columns.format():
             if _label:
@@ -106,7 +106,7 @@ def plotmany(index: pd.Index, data, *, title=None):
                 _newlabel = _col.title()
             plt.plot(index, _df[_col], label=_newlabel, **_kwargs)
     
-    plt.figure(figsize=(15, 7))
+    plt.figure(figsize=figsize)
     if title:
         # plt.title(title, color='white')
         plt.title(title)
@@ -120,9 +120,11 @@ def plotmany(index: pd.Index, data, *, title=None):
             else:
                 plt.plot(index, df_or_ser, label=label, **kwargs)
     plt.legend(loc='upper left')
+    plt.rcParams.update({'font.size': 22})
     axes = plt.axes()
     axes.patch.set_facecolor('black')
     # plt.xticks(rotation=45,color='white')
     plt.xticks(rotation=45)
     # plt.yticks(color='white')
+    plt.grid(True, axis='y')
     plt.show()
