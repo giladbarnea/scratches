@@ -5,10 +5,11 @@
 // if you are buying a stock you are going to get the ask price.
 // a seller asks for X, but gets the highest bid.
 // a buyer offers (bids).
-const states = require('./data.json')
+const states = require('./data-trunc2.json')
 const trades = require('./output.json')
 
-const [ A, B ] = [ { cash: 0, demand: 0 }, { cash: 0, demand: 0 } ]
+const [ A, B ] = [ { cash: 0, amount: 0 }, { cash: 0, amount: 0 } ]
+
 
 let lastTrade
 
@@ -31,69 +32,86 @@ while (trades.length) {
     let b_title = 'B';
 
     ///If I'm *buying*,
-    // I have *less* cash, but
-    // demand goes *up*.
-    /// If I'm *selling*,
-    // I have *more* cash, but
-    // demand goes *down*.
+    // I'll have *less* cash ↓, but
+    // amount ↑ goes *up*.
+    // I'm hoping the price is low.
     if (actions.includes('buyA')) {
-        A.demand += 1
+        A.amount += 1
         A.cash -= a_ask
-        console.log(`Baught A for ${a_ask}$ (cash: ↓ | demand: ↑)`);
-        a_title = `A - ${a_ask}$ (baught)`
+        console.log(`Bought A for ${a_ask}$ (cash: ↓ | amount: ↑)`);
+        a_title = `A - ${a_ask}$ (bought)`
     }
+    if (actions.includes('buyB')) {
+        B.amount += 1
+        B.cash -= b_ask
+        console.log(`Bought B for ${b_ask}$ (cash: ↓ | amount: ↑)`);
+        b_title = `B - ${b_ask}$ (bought)`
+    }
+    /// If I'm *selling*,
+    // I have *more* cash ↑, but
+    // amount ↓ goes *down*.
+    // I'm hoping the price is high.
     if (actions.includes('sellB')) {
-        // when someone sells B,
-        // owner of B got whatever the buyer offered (bid).
-        B.demand -= 1
+        B.amount -= 1
         B.cash += b_bid
-        console.log(`Sold B for ${b_bid}$ (cash: ↑ | demand: ↓)`);
+        console.log(`Sold B for ${b_bid}$ (cash: ↑ | amount: ↓)`);
         b_title = `B + ${b_bid}$ (sold)`
     }
     if (actions.includes('sellA')) {
-        // when someone sells A,
-        // owner of A gets the available bid for A.
-        A.demand -= 1
+        A.amount -= 1
         A.cash += a_bid
-        console.log(`Sold A for ${a_bid}$ (cash: ↑ | demand: ↓)`);
+        console.log(`Sold A for ${a_bid}$ (cash: ↑ | amount: ↓)`);
         a_title = `A + ${a_bid}$ (sold)`
-    }
-    if (actions.includes('buyB')) {
-        // when someone buys B,
-        // the new owner of B says goodbye to whatever price the seller asked.
-        B.demand += 1
-        B.cash -= b_ask
-        console.log(`Baught B for ${b_ask}$ (cash: ↓ | demand: ↑)`);
-        b_title = `B - ${b_ask}$ (baught)`
     }
 
     /// Calculate P&L
     let a_pnl;
-    if (A.demand > 0) {
-        // I BAUGHT more over time (commulivately)
-        a_pnl = A.cash + (A.demand * a_bid);
+    if (A.amount > 0) {
+        // I've *bought* more over time.
+        // profit (cash) is low, but
+        // amount is positive.
+        // To compensate for my lack of cash,
+        // I'm hoping the asset is very expensive right now
+        // and that I have lots of it.
+
+        // *In other words*:
+        // If I've bought a lot, and
+        // now the buying price is very high,
+        // it's best if I'd bought a lot when the price
+        // was low, and now my share is worth a lot
+        a_pnl = A.cash + (A.amount * a_bid);
     } else {
-        // I SOLD more over time (commulivately)
-        a_pnl = A.cash + (A.demand * a_ask);
+        // I've *sold* more over time.
+        // profit (cash) is high, but
+        // amount is negative.
+        // To minimize loss,
+        // I'm hoping the asset is very cheap,
+        // and that I have as close to 0 as possible.
+
+        // *In other words*:
+        // If I've sold a lot, and
+        // now the selling price is very high,
+        // it's like I shorted a booming stock.
+        a_pnl = A.cash + (A.amount * a_ask);
     }
 
     let b_pnl;
-    if (B.demand > 0) {
-        b_pnl = B.cash + B.demand * b_bid;
+    if (B.amount > 0) {
+        b_pnl = B.cash + B.amount * b_bid;
     } else {
-        b_pnl = B.cash + B.demand * b_ask;
+        b_pnl = B.cash + B.amount * b_ask;
     }
     let table = {
         cash: {},
-        demand: {},
+        amount: {},
         "P&L": {}
     };
     table.cash[a_title] = A.cash + "$";
     table.cash[b_title] = B.cash + "$";
     table.cash["Total"] = A.cash + B.cash + "$";
-    table.demand[a_title] = A.demand;
-    table.demand[b_title] = B.demand;
-    table.demand["Total"] = A.demand + B.demand;
+    table.amount[a_title] = A.amount;
+    table.amount[b_title] = B.amount;
+    table.amount["Total"] = A.amount + B.amount;
     table["P&L"][a_title] = a_pnl + '$';
     table["P&L"][b_title] = b_pnl + '$';
     table["P&L"]["Total"] = a_pnl + b_pnl + '$';
