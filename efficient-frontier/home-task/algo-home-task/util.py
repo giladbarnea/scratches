@@ -1,7 +1,11 @@
 import json
+from typing import Tuple, List, Union, overload
+
 import pandas as pd
 from time import sleep
 from matplotlib import pyplot as plt
+
+Data = Union[pd.DataFrame, pd.Series]
 
 
 def with_ijson(f):
@@ -79,17 +83,42 @@ def simulate_stream(data):
             return
 
 
-def plot(df:pd.DataFrame, title=None):
-    return plotmany(df.index, [(df[col], dict(label=col.title())) for col in df.columns.format()], title)
+def plot(df: pd.DataFrame, *, title=None):
+    return plotmany(df.index, df, title=title)
 
 
-def plotmany(x, objs, title=None):
+@overload
+def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None):
+    ...
+
+
+@overload
+def plotmany(index: pd.Index, data: Data, *, title=None):
+    ...
+
+
+def plotmany(index: pd.Index, data, *, title=None):
+    def _plot_df(_df: pd.DataFrame, _label=None, **_kwargs):
+        for _col in _df.columns.format():
+            if _label:
+                _newlabel = f'{_label} - {_col.title()}'
+            else:
+                _newlabel = _col.title()
+            plt.plot(index, _df[_col], label=_newlabel, **_kwargs)
+    
     plt.figure(figsize=(15, 7))
     if title:
         # plt.title(title, color='white')
         plt.title(title)
-    for obj, kwargs in objs:
-        plt.plot(x, obj, **kwargs)
+    if isinstance(data, pd.DataFrame):
+        _plot_df(data)
+    else:
+        for df_or_ser, kwargs in data:
+            label = kwargs.pop('label', None)
+            if isinstance(df_or_ser, pd.DataFrame):
+                _plot_df(df_or_ser, label, **kwargs)
+            else:
+                plt.plot(index, df_or_ser, label=label, **kwargs)
     plt.legend(loc='upper left')
     axes = plt.axes()
     axes.patch.set_facecolor('black')
