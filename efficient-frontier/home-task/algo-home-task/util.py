@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 from time import sleep
+from matplotlib import pyplot as plt
 
 
 def with_ijson(f):
@@ -76,3 +77,23 @@ def simulate_stream(data):
         except IndexError:
             # end of file
             return
+
+
+def plot(df:pd.DataFrame, title=None):
+    return plotmany(df.index, [(df[col], dict(label=col.title())) for col in df.columns.format()], title)
+
+
+def plotmany(x, objs, title=None):
+    plt.figure(figsize=(15, 7))
+    if title:
+        # plt.title(title, color='white')
+        plt.title(title)
+    for obj, kwargs in objs:
+        plt.plot(x, obj, **kwargs)
+    plt.legend(loc='upper left')
+    axes = plt.axes()
+    axes.patch.set_facecolor('black')
+    # plt.xticks(rotation=45,color='white')
+    plt.xticks(rotation=45)
+    # plt.yticks(color='white')
+    plt.show()
