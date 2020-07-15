@@ -5,8 +5,17 @@
 // if you are buying a stock you are going to get the ask price.
 // a seller asks for X, but gets the highest bid.
 // a buyer offers (bids).
-const states = require('./data-trunc2.json')
-const trades = require('./output.json')
+let datafile;
+let ordersfile;
+for (let arg of process.argv) {
+    if (arg.startsWith('--data')) {
+        datafile = arg.substr(7);
+    } else if (arg.startsWith('--orders')) {
+        ordersfile = arg.substr(9);
+    }
+}
+const states = require(datafile)
+const trades = require(ordersfile)
 
 const [ A, B ] = [ { cash: 0, amount: 0 }, { cash: 0, amount: 0 } ]
 
@@ -15,9 +24,9 @@ let lastTrade
 
 while (trades.length) {
     let { time, actions } = trades.shift()
-    if (time < lastTrade + 30 * 1000) {
-        throw new Error(`invalid trade! Wait at least 30 seconds between trades... (${time - lastTrade})`)
-    }
+    // if (time < lastTrade + 30 * 1000) {
+    //     throw new Error(`invalid trade! Wait at least 30 seconds between trades... (you waited only ${(time - lastTrade)/1000}s)`)
+    // }
     console.group(new Date(time));
     lastTrade = time
 
