@@ -6,7 +6,7 @@ from time import sleep
 from matplotlib import pyplot as plt
 
 Data = Union[pd.DataFrame, pd.Series]
-
+from functools import partial
 
 def with_ijson(f):
     import ijson
@@ -102,13 +102,17 @@ def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(100,20),linewi
 
 
 def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5):
-    def _plot_df(_df: pd.DataFrame, _label=None, **_kwargs):
+    def _paint_df(_df: pd.DataFrame, _label=None, **_kwargs):
         for _col in _df.columns.format():
             if _label:
                 _newlabel = f'{_label} - {_col.title()}'
             else:
                 _newlabel = _col.title()
-            plt.plot(index, _df[_col], label=_newlabel, linewidth=linewidth, **_kwargs)
+            if _df.isnull().values.any():
+                _paint = plt.scatter
+            else:
+                _paint = plt.plot
+            _paint(index, _df[_col], label=_newlabel, linewidth=linewidth, **_kwargs)
     
     def _ensure_df(_df_or_ser: Data) -> pd.DataFrame:
         if isinstance(_df_or_ser, pd.DataFrame):
@@ -121,11 +125,13 @@ def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5
         # plt.title(title, color='white')
         plt.title(title, fontdict=dict(fontsize=70))
     if isinstance(data, (pd.DataFrame, pd.Series)):
-        _plot_df(_ensure_df(data))
+        # e.g. plotmany(df.index, df)
+        _paint_df(_ensure_df(data))
     else:
+        # e.g. plotmany(df.index, [(df, {'label':'Foo'}), ...])
         for x in data:
             try:
-                # data is a list of (df, dict(label='Foo')) tuples
+                # data is a list of (df, {'label':'Foo'}) tuples
                 df_or_ser, kwargs = x
             except ValueError:
                 # data is a just a list of df or ser
@@ -133,11 +139,15 @@ def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5
                 kwargs = dict()
             label = kwargs.pop('label', None)
             if isinstance(df_or_ser, (pd.DataFrame, pd.Series)):
-                _plot_df(_ensure_df(df_or_ser), label, **kwargs)
+                _paint_df(_ensure_df(df_or_ser), label, **kwargs)
             else:
-                plt.plot(index, df_or_ser, label=label, **kwargs)
-    plt.legend(loc='upper left')
-    plt.rcParams.update({'font.size': 22})
+                if df_or_ser.isnull().values.any():
+                    paint = plt.scatter
+                else:
+                    paint = plt.plot
+                paint(index, df_or_ser, label=label, **kwargs)
+    plt.legend(loc='upper left', prop=dict(size=45))
+    # plt.rcParams.update({'font.size': 22})
     axes = plt.axes()
     axes.patch.set_facecolor('black')
     # plt.xticks(rotation=45,color='white')
