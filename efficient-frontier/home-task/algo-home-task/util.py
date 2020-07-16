@@ -83,28 +83,32 @@ def simulate_stream(data):
             return
 
 
-def plot(df: pd.DataFrame, *, title=None, figsize=(100,20)):
-    return plotmany(df.index, df, title=title, figsize=figsize)
+def plot(df: pd.DataFrame, *, title=None, figsize=(100,20), linewidth=5):
+    return plotmany(df.index, df, title=title, figsize=figsize, linewidth=linewidth)
 
 
 @overload
-def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None, figsize=(100,20)):
+def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None, figsize=(100,20), linewidth=5):
+    ...
+
+@overload
+def plotmany(index: pd.Index, data: List[Data], *, title=None, figsize=(100,20), linewidth=5):
     ...
 
 
 @overload
-def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(100,20)):
+def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(100,20),linewidth=5):
     ...
 
 
-def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20)):
+def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5):
     def _plot_df(_df: pd.DataFrame, _label=None, **_kwargs):
         for _col in _df.columns.format():
             if _label:
                 _newlabel = f'{_label} - {_col.title()}'
             else:
                 _newlabel = _col.title()
-            plt.plot(index, _df[_col], label=_newlabel, **_kwargs)
+            plt.plot(index, _df[_col], label=_newlabel, linewidth=linewidth, **_kwargs)
     
     def _ensure_df(_df_or_ser: Data) -> pd.DataFrame:
         if isinstance(_df_or_ser, pd.DataFrame):
@@ -119,7 +123,14 @@ def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20)):
     if isinstance(data, (pd.DataFrame, pd.Series)):
         _plot_df(_ensure_df(data))
     else:
-        for df_or_ser, kwargs in data:
+        for x in data:
+            try:
+                # data is a list of (df, dict(label='Foo')) tuples
+                df_or_ser, kwargs = x
+            except ValueError:
+                # data is a just a list of df or ser
+                df_or_ser = x
+                kwargs = dict()
             label = kwargs.pop('label', None)
             if isinstance(df_or_ser, (pd.DataFrame, pd.Series)):
                 _plot_df(_ensure_df(df_or_ser), label, **kwargs)
@@ -132,5 +143,5 @@ def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20)):
     # plt.xticks(rotation=45,color='white')
     plt.xticks(rotation=45)
     # plt.yticks(color='white')
-    plt.grid(True, axis='both')
+    plt.grid(True, axis='y')
     plt.show()
