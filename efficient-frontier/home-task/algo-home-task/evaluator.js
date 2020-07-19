@@ -24,9 +24,9 @@ let lastTrade
 
 while (trades.length) {
     let { time, actions } = trades.shift()
-    // if (time < lastTrade + 30 * 1000) {
-    //     throw new Error(`invalid trade! Wait at least 30 seconds between trades... (you waited only ${(time - lastTrade)/1000}s)`)
-    // }
+    if (time < lastTrade + 30 * 1000) {
+        throw new Error(`invalid trade! Wait at least 30 seconds between trades... (you waited only ${(time - lastTrade)/1000}s)`)
+    }
     console.group(new Date(time));
     lastTrade = time
 

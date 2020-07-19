@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 Data = Union[pd.DataFrame, pd.Series]
 from functools import partial
 
+
 def with_ijson(f):
     import ijson
     parser = ijson.parse(f)
@@ -83,25 +84,26 @@ def simulate_stream(data):
             return
 
 
-def plot(df: pd.DataFrame, *, title=None, figsize=(100,20), linewidth=5):
+def plot(df: pd.DataFrame, *, title=None, figsize=(100, 20), linewidth=5):
     return plotmany(df.index, df, title=title, figsize=figsize, linewidth=linewidth)
 
 
 @overload
-def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None, figsize=(100,20), linewidth=5):
-    ...
-
-@overload
-def plotmany(index: pd.Index, data: List[Data], *, title=None, figsize=(100,20), linewidth=5):
+def plotmany(index: pd.Index, data: List[Tuple[Data, dict]], *, title=None, figsize=(100, 20), linewidth=5):
     ...
 
 
 @overload
-def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(100,20),linewidth=5):
+def plotmany(index: pd.Index, data: List[Data], *, title=None, figsize=(100, 20), linewidth=5):
     ...
 
 
-def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5):
+@overload
+def plotmany(index: pd.Index, data: Data, *, title=None, figsize=(100, 20), linewidth=5):
+    ...
+
+
+def plotmany(index: pd.Index, data, *, title=None, figsize=(100, 20), linewidth=5):
     def _paint_df(_df: pd.DataFrame, _label=None, **_kwargs):
         for _col in _df.columns.format():
             if _label:
@@ -112,7 +114,12 @@ def plotmany(index: pd.Index, data, *, title=None, figsize=(100,20), linewidth=5
                 _paint = plt.scatter
             else:
                 _paint = plt.plot
-            _paint(index, _df[_col], label=_newlabel, linewidth=linewidth, **_kwargs)
+            if 'marker' in _kwargs:
+                _linewidth = 200
+                _paint = plt.scatter
+            else:
+                _linewidth = linewidth
+            _paint(index, _df[_col], label=_newlabel, linewidth=_linewidth, **_kwargs)
     
     def _ensure_df(_df_or_ser: Data) -> pd.DataFrame:
         if isinstance(_df_or_ser, pd.DataFrame):
