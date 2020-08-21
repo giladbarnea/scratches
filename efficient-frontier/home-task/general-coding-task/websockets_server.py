@@ -12,7 +12,7 @@ async def hello(websocket, path):
     print(f"> {greeting}")
 
 
-start_server = websockets.serve(hello, "localhost", 8765)
-
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+start_server: websockets.server.Serve = websockets.serve(hello, "localhost", 8765)
+loop = asyncio.get_event_loop()
+server: websockets.server.WebSocketServer = loop.run_until_complete(start_server)
+loop.run_forever()

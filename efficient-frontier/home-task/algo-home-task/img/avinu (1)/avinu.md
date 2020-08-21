@@ -10,7 +10,7 @@ except Exception as e:
 import warnings
 warnings.filterwarnings("ignore")
 import util
-with open('./data-trunc2.json',mode='r') as f:
+with open('./data-40k--1577837713577.json5',mode='r') as f:
     # data:dict = json.load(f)
     data:dict = util.partial_json(f, until_key='1577836893387')
 

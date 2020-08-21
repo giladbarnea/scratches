@@ -1,0 +1,3 @@
+%run /home/gilad/.ipython/profile_default/startup/ipython_utils.py
+%run /home/gilad/.ipython/profile_default/startup/extensions.ipy
+%run /home/gilad/.ipython/profile_default/startup/aliases.ipy

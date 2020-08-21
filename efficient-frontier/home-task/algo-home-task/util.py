@@ -1,12 +1,13 @@
 import json
-from typing import Tuple, List, Union, overload
-
-import pandas as pd
 from time import sleep
+from typing import Tuple, List, Union, overload
+from pathlib import Path
+import pandas as pd
 from matplotlib import pyplot as plt
+import pickle
+import json5
 
 Data = Union[pd.DataFrame, pd.Series]
-from functools import partial
 
 
 def with_ijson(f):
@@ -32,6 +33,50 @@ def with_ijson(f):
             # set value for given ask / bid
             _, asset, order = prefix.split('.')
             data[ts][asset][order] = value
+    return data
+
+
+def json_load(path: str, new=False, dump_pickle=True) -> dict:
+    """
+    Tries to load data from pickle file. If pickle file doens't exist, loads original file.
+    
+    :param path: The file path, with or without extension, i.e. './output' or './output.pickle' or './output.json5'.
+    :param new: Specify True to force using the original file and not use the pickled file.
+    :param dump_pickle: By default, pickles the original file (if used). Specify False to not pickle even if original file is used.
+    """
+    
+    def load_new():
+        with open(jsonpath) as f:
+            _data = jsonload(f)
+        if dump_pickle:
+            with open(picklepath, 'w+b') as f:
+                pickle.dump(_data, f)
+        return _data
+    
+    path = Path(path)
+    if (tmp := path.with_suffix('.json5')).exists():
+        jsonpath = tmp
+        jsonload = json5.load
+    else:
+        jsonpath = path.with_suffix('.json')
+        jsonload = json.load
+    picklepath = path.with_suffix('.pickle')
+    
+    if new:
+        # don't use pickle: load the actual file
+        print(f'using original {jsonpath} and {"not " if not dump_pickle else ""}creating pickle')
+        data = load_new()
+        return data
+    
+    # use pickle if exists
+    if picklepath.exists():
+        print(f'using pickle: {picklepath}')
+        with open(picklepath, 'r+b') as f:
+            data = pickle.load(f)
+            return data
+    # pickle doesn't exist
+    print(f"pickle doesn't exist: using original {jsonpath} and {'not ' if not dump_pickle else ''}creating pickle")
+    data = load_new()
     return data
 
 

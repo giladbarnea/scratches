@@ -1,5 +1,10 @@
 import asyncio
 import socket
+import urllib.parse
+import sys
+
+ftx = 'wss://ftx.com/ws/options/trades'
+bitmex = 'wss://testnet.bitmex.com/realtime?subscribe=execution:XBTUSD,instrument'
 
 
 async def wait_for_data():
@@ -27,4 +32,18 @@ async def wait_for_data():
     wsock.close()
 
 
+async def foo(url):
+    loop = asyncio.get_running_loop()
+    split = urllib.parse.urlsplit(url)
+    print(f'split url: (hostname: {split.hostname})', split)
+    # reader, writer = await asyncio.open_connection(split.hostname)
+    reader, writer = await asyncio.open_connection(url)
+    print('opened connection')
+    data = await reader.read(100)
+    print(f'Received: {data.decode()!r}')
+    writer.close()
+    await writer.wait_closed()
+
+
+# asyncio.run(foo(sys.argv[1]))
 asyncio.run(wait_for_data())
