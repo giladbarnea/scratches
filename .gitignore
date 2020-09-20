@@ -31,3 +31,8 @@ termcolor-1.1.0
 *.ipynb_checkpoints*
 efficient-frontier/home-task/package-lock.json
 .env
+
+twilio-whatsapp
+Mega
+esm-scratch
+pyano-2.0-versions-playground
